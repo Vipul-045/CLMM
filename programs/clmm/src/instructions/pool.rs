@@ -49,22 +49,22 @@ pub struct InitializePool <'info> {
 }
 
 impl<'info> InitializePool<'info>{
-    pub fn init_pool(ctx: Context<InitializePool>, tick_spacing: i32, initial_sqrt_price: u128) -> Result<()>{
+    pub fn init_pool(tick_spacing: i32, initial_sqrt_price: u128) -> Result<()>{
         let pool = &mut ctx.accounts.pool;
 
         require!(tick_spacing > 0 , ErrorCode::InvalidTickSpacing);
 
         require!(ctx.accounts.token_mint_1.key() != ctx.accounts.token_mint_2.key() , ErrorCode::InvalidTokenPair);
 
-        pool.token_mint_1 = ctx.accounts.token_mint_1.key();
-        pool.token_mint_2 = ctx.accounts.token_mint_2.key();
-        pool.token_vault_1 = ctx.accounts.token_vault_1.key();
-        pool.token_vault_2 = ctx.accounts.token_vault_2.key();
+        pool.token_mint_1 = self.token_mint_1.key();
+        pool.token_mint_2 = self.token_mint_2.key();
+        pool.token_vault_1 = self.token_vault_1.key();
+        pool.token_vault_2 = self.token_vault_2.key();
         pool.global_liquidity = 0;
         pool.sqrt_price_x96 = initial_sqrt_price;
         pool.current_tick = get_tick_at_sqrt_price(initial_sqrt_price)?;
         pool.tick_spacing = tick_spacing;
-        pool.bump = ctx.bumps.pool;
+        pool.bump = self.bumps.pool;
 
         Ok(())
     }
