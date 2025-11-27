@@ -56,6 +56,16 @@ impl<'info> InitializePool<'info>{
 
         require!(ctx.accounts.token_mint_1.key() != ctx.accounts.token_mint_2.key() , ErrorCode::InvalidTokenPair);
 
-        
+        pool.token_mint_1 = ctx.accounts.token_mint_1.key();
+        pool.token_mint_2 = ctx.accounts.token_mint_2.key();
+        pool.token_vault_1 = ctx.accounts.token_vault_1.key();
+        pool.token_vault_2 = ctx.accounts.token_vault_2.key();
+        pool.global_liquidity = 0;
+        pool.sqrt_price_x96 = initial_sqrt_price;
+        pool.current_tick = get_tick_at_sqrt_price(initial_sqrt_price)?;
+        pool.tick_spacing = tick_spacing;
+        pool.bump = ctx.bumps.pool;
+
+        Ok(())
     }
 }
