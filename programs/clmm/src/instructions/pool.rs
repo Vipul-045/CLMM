@@ -25,7 +25,7 @@ pub struct InitializePool <'info> {
         ],
         bumps
     )]
-    pub pool : Account<'info, Pool>
+    pub pool : Account<'info, Pool>,
 
     #[account(
         init,
@@ -46,5 +46,16 @@ pub struct InitializePool <'info> {
     pub system_program : Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub rent : Sysvar<'info, Rent>
+}
 
+impl<'info> InitializePool<'info>{
+    pub fn init_pool(ctx: Context<InitializePool>, tick_spacing: i32, initial_sqrt_price: u128) -> Result<()>{
+        let pool = &mut ctx.accounts.pool;
+
+        require!(tick_spacing > 0 , ErrorCode::InvalidTickSpacing);
+
+        require!(ctx.accounts.token_mint_1.key() != ctx.accounts.token_mint_2.key() , ErrorCode::InvalidTokenPair);
+
+        
+    }
 }
