@@ -75,3 +75,24 @@ pub struct OpenPosition<'info>{
 
     pub rent: Sysvar<'info, Rent>,
 }
+
+impl<'info> OpenPosition<'info>{
+    pub fn open_position(
+        owner: Pubkey,
+        lower_tick: i32,
+        upper_tick: i32,
+        liquidity_amount: u128,
+        _tick_array_lower_start_index: i32,
+        _tick_array_upper_start_index: i32,
+    ) -> Result <(u64, u64)> {
+        let pool = &mut self.pool.key();
+        let position = &mut self.position.key();
+
+        require!(liquidity_amount > 0, ErrorCode::InsufficientInputAmount);
+
+        let lower_tick_array = &mut self.lower_tick_array;
+        let upper_tick_array = &mut self.upper_tick_array;
+
+        
+    }
+}
