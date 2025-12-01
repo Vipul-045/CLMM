@@ -126,5 +126,33 @@ pub struct OpenPosition<'info>{
 
         pool.global_liquidity = pool.global_liquidity.checked_add(liquidity_amount).ok_or(ErrorCode::ArithemeticOverflow);
 
+        if amount_1 > 0 {
+            token::Transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer{
+                        from: ctx.accounts.user_token_1.to_account_info(),
+                        to: ctx.accounts.pool_token_1.to_account_info(),
+                        authority: ctx.accounts.payer.to_account_info()
+                    },
+                ),
+                amount_1
+            )
+        }
 
+        if amount_2 > 0{
+            token::Transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer{
+                        from: ctx.accounts.user_token_2.to_account_info(),
+                        to: ctx.accounts.pool_token_2.to_account_info(),
+                        authority: ctx.accounts.payer.to_account_info(),
+                    }
+                ),
+                amount_2
+            )
+        }
+
+        Ok((amount_1, amount_2))
     }
