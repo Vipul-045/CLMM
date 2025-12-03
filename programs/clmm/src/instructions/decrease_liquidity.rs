@@ -94,6 +94,57 @@ pub fn decrease_liquidity(
 
         position.liquidity = position.liquidity.checked_sub(liquidity_amount).ok_or(ErrorCode::ArithemeticOverflow)?;
 
-        
+        let (amount_1, amount_2) = get_amounts_for_liquidity(
+            pool.sqrt_price_x96,
+            get_sqrt_price_from_tick(lower_tick)?,
+            get_sqrt_price_from_tick(upper_tick)?,
+            liquidity_amount,
+        );
+
+        pool.global_liquidity = pool.global_liquidity.checked_sub(liquidity_amount).ok_or(ErrorCode::ArithemeticOverflow);
+
+        if amount_1 > 0 {
+            let signer_seeds: &[&[&[u8]]] = &[&[
+                b"pool".as_ref(),
+                pool.token_mint_1.as_ref(),
+                pool.token_mint_2.as_ref(),
+                &pool.tick_spacing.to_le_bytes(),
+                &[pool.bump]
+            ]];
+
+            let ctx = CpiContext:: new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer{
+                    from: ctx.accounts.pool_token_1.to_account_info(),
+                    to: ctx.accounts.user_token_1.to_account_info(),
+                    authority: pool.to_account_info()
+                },
+                signer_seeds,
+            );
+
+            token::Transfer(ctx, amount_1)?;
+        }
+
+        if amount_2 > 0 {
+            let signer_seeds: &[&[&[u8]]] = &[&[
+                b"pool".as_ref(),
+                pool.token_mint_1.as_ref(),
+                pool.pool_token_2.as_ref(),
+                pool.tick_spacing.to_le_bytes(),
+                &[pool.bump]
+            ]];
+
+            let ctx = CpiContext:: new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer{
+                    from: ctx.accounts.pool_token_2.to_account_info(),
+                    to: ctx.accounts.user_token_2.to_account_info(),
+                    authority: pool.to_account_info()
+                },
+            );
+            transfer(ctx, amount_2);
+        }
+
+        Ok((amount_1, amount_2))
  
     }
