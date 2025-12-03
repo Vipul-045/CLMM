@@ -65,3 +65,35 @@ pub struct DecreaseLiquidity <'info>{
 
 }
 
+pub fn decrease_liquidity(
+    ctx: Context<DecreaseLiquidity>,
+    liquidity_amount: u128,
+    lower_tick: i32,
+    upper_tick: i32
+    ) -> Result <(u64, u64)> {
+        let pool = &mut ctx.accounts.pool;
+        let position = &mut ctx.accounts.pool;
+
+        require!(
+            lower_tick < upper_tick
+            && lower_tick % pool.tick_spacing == 0
+            && upper_tick % pool.tick_spacing == 0, ErrorCode: InvalidTickRange
+        );
+        require!(liquidity_amount > 0 , ErrorCode: InsufficientInputAmount);
+
+        require!(pool.current_tick >= lower_tick && pool.current_tick < upper_tick, ErrorCode: MintRangeMustCoverCurrentPrice);
+
+        let lower_tick_array = &mut ctx.accounts.lower_tick_array;
+        let upper_tick_array = &mut ctx.accounts.upper_tick_array;
+
+        let lower_tick_info = lower_tick_array.get_info_tick_mutable(lower_tick, pool.tick_spacing)?;
+        let upper_tick_info = lower_tick_array.get_info_tick_mutable(upper_tick, pool.tick_spacing)?;
+
+        lower_tick_info.update_liquidity(liquidity_amount as i128, true)?;
+        upper_tick_info.update_liquidity(liquidity_amount as i128, false)?;
+
+        position.liquidity = position.liquidity.checked_sub(liquidity_amount).ok_or(ErrorCode::ArithemeticOverflow)?;
+
+        
+ 
+    }
