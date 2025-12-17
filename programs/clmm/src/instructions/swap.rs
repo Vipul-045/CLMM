@@ -45,3 +45,35 @@ pub struct Swap<'info>{
     pub rent: Sysvar<'info, rent>
 
 }
+
+pub fn swap(
+    ctx: Context<Swap>,
+    amount_in: u64,
+    swap_token_1_for_2: bool,
+    amount_out_minimum: u64,
+) -> Result<u64>{
+    let pool = &mut ctx.accounts.pool;
+
+    require!(pool.global_liquidity > 0 , ErrorCode::InsuficientPoolLiquidity);
+    require!(amount_in > 0, ErrorCode::InsufficientInput);
+
+    let(amount_in_used, amount_out_calculated, new_sqrt_price_x86) = swap_segment(
+        pool.sqrt_price_x86,
+        pool.global_liquidity,
+        amount_in,
+        swap_token_1_for_2
+    )?;
+
+    require!(amount_out_calculated >= amount_out_minimum, ErrorCode::SlippageExceeded);
+
+    let signer_seeds: &[&[&[u8]]] = &[&[
+        b"pool",
+        pool.token_mint_1.as_ref(),
+        pool.token_mint_2.as_ref(),
+        &pool.tick_spacing.to_le_bytes(),
+        &[pool.bump],
+    ]];
+
+    
+
+}
