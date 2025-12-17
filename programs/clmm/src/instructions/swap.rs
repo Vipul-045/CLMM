@@ -74,6 +74,58 @@ pub fn swap(
         &[pool.bump],
     ]];
 
-    
+    if swap_token_1_for_2 { 
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer{
+                    from: ctx.accounts.user_token_1.to_account_info(),
+                    to: ctx.accounts.pool_token_1.to_account_info(),
+                    authority: ctx.accounts.payer.to_account_info()
+                },
+            ),
+            amount_in_used,
+        )?;
 
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer{
+                    from: ctx.accounts.pool_token_2.to_account_info(),
+                    to: ctx.accounts.user_token_2.to_account_info(),
+                    authority: pool.to_account_info(),
+                }, signer_seeds,
+            ), amount_out_calculated
+        )?;
+    }
+
+    else{
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer{
+                    from: ctx.accounts.user_token_2.to_account_info(),
+                    to: ctx.accounts.pool_token_2.to_account_info(),
+                    authority: ctx.accounts.payer.to_account_info()
+                }
+            ), amount_in_used
+        )?;
+
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer{
+                    from: ctx.accounts.pool_token_1.to_account_info(),
+                    to: ctx.accounts.user_token_1.to_account_info(),
+                    authority: pool.to_account_info(),
+                },
+                signer_seeds
+            ), amount_out_calculated,
+        )?;
+    }
+
+    pool.sqrt_price_x86 = new_sqrt_price_x86;
+    pool.current_tick = get_tick_at_sqrt_price(new_sqrt_price_x86)?;
+
+    Ok(amount_out_calculated)
 }
