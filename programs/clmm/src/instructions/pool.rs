@@ -5,7 +5,7 @@ use crates::utils::ErrorCode;
 use crate::utils::math::*;
 
 #[derive(Accounts)]
-#[intruction(tick_spacing: i32)]
+#[instruction(tick_spacing: i32)]
 pub struct InitializePool <'info> {
     #[account(mut)]
     pub payer: signer<'info>,
@@ -48,8 +48,7 @@ pub struct InitializePool <'info> {
     pub rent : Sysvar<'info, Rent>
 }
 
-impl<'info> InitializePool<'info>{
-    pub fn init_pool(tick_spacing: i32, initial_sqrt_price: u128) -> Result<()>{
+    pub fn initializepool(tick_spacing: i32, initial_sqrt_price: u128) -> Result<()>{
         let pool = &mut ctx.accounts.pool;
 
         require!(tick_spacing > 0 , ErrorCode::InvalidTickSpacing);
@@ -68,4 +67,3 @@ impl<'info> InitializePool<'info>{
 
         Ok(())
     }
-}
