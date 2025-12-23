@@ -8,14 +8,14 @@ declare_id!("4YfgeshfgHDeURYNvZH77W4yF8554oenSHAzaAQEmedo");
 
 #[program]
 pub mod clmm {
-    use crate::instructions::open_position::OpenPosition;
+    use crate::instructions::{decrease_liquidity::DecreaseLiquidity, open_position::OpenPosition};
 
     use super::*;
 
     pub fn initializepool(ctx: Context<InitializePool>,
         tick_spacing: i32,
         initial_sqrt_price: u128) -> Result<()> {
-        instructions::pool::init_pool(ctx, tick_spacing, initial_sqrt_price)
+        instructions::initializepool::initializepool(ctx, tick_spacing, initial_sqrt_price)
     }
 
     pub fn open_position(
@@ -29,5 +29,22 @@ pub mod clmm {
                 instructions::open_position::open_position(ctx, owner, lower_tick, upper_tick, liquidity_amount, tick_array_lower_start_index, tick_array_upper_start_index)
     }
 
+    pub fn decrease_liquidity(
+        ctx: Context<DecreaseLiquidity>,
+        liquidity_amount: u128,
+        lower_tick: i32,
+        upper_tick: i32
+    ) -> Result<(u64, u64)>{
+        instructions::decrease_liquidity::decrease_liquidity(ctx, liquidity_amount, lower_tick, upper_tick)
+    }
+
+    pub fn swap(
+        ctx: Context<Swap>,
+        amount_in:u64,
+        swap_token_1_for_2:bool,
+        amount_out_minimum: u64,
+    ) -> Result<(u64)>{
+        instruction::swap::swap(ctx, amount_in, swap_token_1_for_2, amount_out_minimum)
+    }
 
 }
